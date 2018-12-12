@@ -65,7 +65,7 @@ public class Main {
 */
 
         String inputPath = new String("./src/input.txt");
-        //String outputPath = new String("./src/output.txt");
+        String outputPath = new String("./src/output.txt");
         //Task3.task3(inputPath, outputPath);
 
         String dstIP = "192.168.1.1";
@@ -78,13 +78,13 @@ public class Main {
             srcIP = args[1];
         }
 
-        MAC sender = new MAC(MAC.SENDER, inputPath, srcIP, dstIP);
-
-        sender.run();
-
-        //MAC reciever = new MAC(MAC.RECEIVER, inputPath, srcIP, dstIP);
-
-        //reciever.run();
+        if (args.length > 0) {
+            MAC sender = new MAC(MAC.SENDER, inputPath, srcIP, dstIP);
+            sender.run();
+        } else {
+            MAC reciever = new MAC(MAC.RECEIVER, outputPath, srcIP, dstIP);
+            reciever.run();
+        }
 
 
         exit(0);
