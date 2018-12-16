@@ -71,6 +71,16 @@ public class Main {
         String dstIP = "192.168.1.1";
         String srcIP = "192.168.1.2";
 
+        if (args.length == 2 && args[0].charAt(0) == 'p') {
+            System.out.println("HAHA");
+            if (args.length == 2) {
+                dstIP = args[1];
+                MAC pinger = new MAC(MAC.PING, outputPath, srcIP, dstIP);
+                pinger.run();
+                exit(0);
+            }
+        }
+
         if (args.length == 1) {
             dstIP = args[0];
         }

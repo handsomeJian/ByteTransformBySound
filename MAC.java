@@ -8,6 +8,7 @@ public class MAC extends Thread {
 
     static final int RECEIVER = 0;
     static final int SENDER = 1;
+    static final int PING = 2;
 
     static final int FRADETE = 0;
     static final int RX = 1;
@@ -59,6 +60,10 @@ public class MAC extends Thread {
             inDataProcess = new DataProcess(inputFileString, 400, 1);  // !!!!!!
         } else if (role == RECEIVER) {
             state = FRADETE;
+            outputFileString = tmpFileString;
+            outDataProcess = new DataProcess(outputFileString, 400, 0);
+        } else if (role == PING) {
+            state = TX;
             outputFileString = tmpFileString;
             outDataProcess = new DataProcess(outputFileString, 400, 0);
         }
@@ -236,6 +241,16 @@ public class MAC extends Thread {
         sendPre = false;
         return true;
     }
+    public boolean sendPingData() {
+        tmpSendFrameSize = 8;
+        for (int i = 0; i < 8; ++i)
+            tmpSendBuffer[i] = i % 2;
+        addIP();
+        sender.mySender(tmpSendBuffer, tmpSendFrameSize);
+        return true;
+    }
+
+    long lastPingTime = 0;
 
     public void run(){
         init();
@@ -251,6 +266,17 @@ public class MAC extends Thread {
                     state = RX;
                     frameDetect = NOT_HAVE_FRAME;
                     continue;
+                }
+                if (role == MAC.PING) {
+                    if (saveFull == 1) {
+                        Date nowDate = new Date();
+                        long nowTime = nowDate.getTime();
+                        System.out.print("Ping Latency = ");
+                        System.out.println(nowTime - lastPingTime);
+                        break;
+                    }
+                    if (lastPingTime != 0)
+                        continue;
                 }
                 if (role == MAC.RECEIVER) {
                     if (saveFull == 1)
@@ -342,6 +368,16 @@ public class MAC extends Thread {
                     Date nowDate = new Date();
                     lastSendTime = nowDate.getTime();
                     System.out.println("TX");
+                    if (role == PING) {
+                        if (lastPingTime != 0) {
+                            state = FRADETE;
+                            continue;
+                        }
+                        lastPingTime = lastSendTime;
+                        sendPingData();
+                        state = FRADETE;
+                        continue;
+                    }
                     if (!sendFileData()) {
                         sendFull++;
                         //Task3Mod.receiveContinue = false;
